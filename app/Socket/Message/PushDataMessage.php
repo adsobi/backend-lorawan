@@ -13,7 +13,7 @@ class PushDataMessage extends Message
 
     private function retrieveOtherData(): void {
 
-        $this->gatewayMAC = $this->parser->parse(4, 8);
+        $this->gatewayMAC = $this->parser->parse(8, 16);
         $this->payload = $this->parser->parsePayload(12);
     }
 }

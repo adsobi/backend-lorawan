@@ -19,8 +19,9 @@ final class Parser
         return substr($this->hexData, $from, $length);
     }
 
-    public function parsePayload(int $from): stdClass|null
+    public function parsePayload(int $from): array|null
     {
-        return json_decode(substr($this->data, $from, strlen($this->data))) ?? null;
+
+        return json_decode(substr($this->data, $from, strlen($this->data)), true) ?? null;
     }
 }

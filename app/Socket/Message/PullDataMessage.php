@@ -13,6 +13,6 @@ class PullDataMessage extends Message
 
     private function retrieveOtherData(): void {
 
-        $this->gatewayMAC = $this->parser->parse(4, 8);
+        $this->gatewayMAC = $this->parser->parse(8, 16);
     }
 }

@@ -11,7 +11,7 @@ class Message
     public string $token;
     public string $identifier;
     public ?string $gatewayMAC;
-    public ?stdClass $payload;
+    public ?array $payload;
 
     public Parser $parser;
 
