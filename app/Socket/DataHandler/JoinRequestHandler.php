@@ -13,7 +13,7 @@ use CryptLib\MAC\Implementation\CMAC;
 class JoinRequestHandler extends BasePackageHandler
 {
     protected string $key;
-    public string $appEUI;
+    public string $joinEUI;
     public string $devEUI;
     public string $devNonce;
 
@@ -26,7 +26,7 @@ class JoinRequestHandler extends BasePackageHandler
     ) {
         parent::__construct();
 
-        $this->appEUI = self::reverseHex(substr($this->payload, 0, 16), 2);
+        $this->joinEUI = self::reverseHex(substr($this->payload, 0, 16), 2);
         $this->devEUI = self::reverseHex(substr($this->payload, 16, 16), 2);
         $this->devNonce = self::reverseHex(substr($this->payload, 32, 4), 2);
         //devNonce must be unique in communication from end device to server on each message

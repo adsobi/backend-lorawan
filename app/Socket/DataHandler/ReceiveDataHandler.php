@@ -35,7 +35,7 @@ class ReceiveDataHandler
                             // dump($value);
                             // $mic = substr($phyPayload, strlen($phyPayload) - 8, 8);
                             // $macPayload = substr($phyPayload, 2, strlen($phyPayload) - strlen($mhdr) - strlen($mic));
-                            // $appEUI = substr($macPayload, 0, 16);
+                            // $joinEUI = substr($macPayload, 0, 16);
                             // $devEUI = join(array_reverse(str_split(substr($macPayload, 16, 16), 2)));
                             // $devNonce = substr($macPayload, 32, 4);
 
@@ -43,10 +43,10 @@ class ReceiveDataHandler
                              * There checks is end-device authorized in db and then create JoinAcceptHandler
                             */
 
-                            new JoinAcceptHandler($phyPayload, $joinRequest->devNonce);
+                            return new JoinAcceptHandler($phyPayload, $joinRequest->devNonce);
 
-                            //TODO: send join accept
-                            return true;
+                            // //TODO: send join accept
+                            // return true;
                             break;
                         // case MType::JOIN_ACCEPT->value:
                         //     dump('JOIN_ACCEPT');

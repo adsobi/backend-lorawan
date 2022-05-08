@@ -7,7 +7,7 @@
 // // $mhdr = substr($phyPayload, 0, 2);
 // // $mic = substr($phyPayload, strlen($phyPayload) - 8, 8);
 // // $macPayload = substr($phyPayload, 2, strlen($phyPayload) - strlen($mhdr) - strlen($mic));
-// // $appEUI = substr($macPayload, 0, 16);
+// // $joinEUI = substr($macPayload, 0, 16);
 // // $devEUI = join(array_reverse(str_split(substr($macPayload, 16, 16), 2)));
 // // $devNonce = substr($macPayload, 32, 4);
 // // //echo ($macPayload . $mic);
