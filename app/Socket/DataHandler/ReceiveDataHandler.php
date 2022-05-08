@@ -19,8 +19,8 @@ class ReceiveDataHandler
         switch (bin2hex(substr($message, 3, 1))) {
             case Packet::PKT_PUSH_DATA->value:
                 $messageObj = new PushDataMessage($message);
-                $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PUSH_ACK->value);
-                $server->send($response, $address);
+                // $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PUSH_ACK->value);
+                // $server->send($response, $address);
 
                 if (isset($messageObj->payload['rxpk']))
                 {

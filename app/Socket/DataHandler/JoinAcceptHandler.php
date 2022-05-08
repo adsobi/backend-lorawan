@@ -83,8 +83,10 @@ class JoinAcceptHandler extends BasePackageHandler
         dump('mic: ', self::calculateMIC($this->appKey));
         dump('devAddr: ', $this->devAddr);
         dump('phyPayload', self::makePHYPayload());
-        $this->payload = self::decryptAes(self::makePayloadWithMIC());
-        return $this->mhdr . $this->payload . self::calculateMIC($this->appKey);
+        $this->payload = self::decrypt(self::makePayloadWithMIC());
+        $x = $this->mhdr . $this->payload . self::calculateMIC($this->appKey);
+        dump(base64_encode($x));
+        return $x;
     }
 
     public function calcMIC($payload): string
@@ -96,6 +98,9 @@ class JoinAcceptHandler extends BasePackageHandler
 
     private function decrypt(string $data)
     {
-        openssl_encrypt($data, 'aes-128-ecb', $this->appKey, OPENSSL_ZERO_PADDING);
+        dump('data: ', $data);
+        $x = bin2hex(openssl_decrypt($data, 'AES-128-ECB', $this->appKey, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, ''));
+        dump($x);
+        return $x;
     }
 }
