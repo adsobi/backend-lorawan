@@ -2,6 +2,7 @@
 
 namespace App\Socket\DataHandler;
 
+use App\Enums\Packet;
 use App\Enums\MType;
 use CryptLib\MAC\Implementation\CMAC;
 
@@ -32,44 +33,40 @@ class JoinAcceptHandler extends BasePackageHandler
     ) {
         //parent::__construct();
         $this->hasher = new CMAC();
-        $this->mhdr = '20';
+        $this->mhdr = "20";
         $this->joinNonce = self::reverseHex(bin2hex(openssl_random_pseudo_bytes(3)));
         $this->devAddr = self::reverseHex(bin2hex(openssl_random_pseudo_bytes(4)));
-        $this->netID = self::reverseHex(self::binaryToHex(
-            self::bitExtractor(bin2hex(openssl_random_pseudo_bytes(3)), 17, 1)
-                . self::bitExtractor($this->devAddr, 7, 26)
-        ));
-        // dump($x = str_pad(decbin(hexdec(bin2hex(openssl_random_pseudo_bytes(2)))), 17, '0', STR_PAD_LEFT). str_pad(decbin(hexdec(self::bitExtractor($this->devAddr, 7, 32))), 7, '0', STR_PAD_LEFT));
-        // dump(strlen($x));
+        $this->netID = "000001"; ///Experimental network according to docs
         $this->dlSettings = self::binaryToHex('01001110');
         $this->rxDelay = '02';
-        $this->cfList = '0000000000000000';
-        $this->nwkSKey = bin2hex(self::generatorOfSKey('00000001'));
-        $this->appSKey = bin2hex(self::generatorOfSKey('00000010'));
+        $this->cfList = '184f84e85684b85e84886684586e8400';
+        // $this->nwkSKey = bin2hex(self::generatorOfSKey('00000001'));
+        // $this->appSKey = bin2hex(self::generatorOfSKey('00000010'));
     }
 
-    private function generatorOfSKey($binaryValue)
-    {
-        $c = str_pad(
-            $binaryValue . self::hexToBinary($this->joinNonce) . self::hexToBinary($this->netID) . self::hexToBinary($this->devNonce),
-            (16 % ($len = (strlen($this->joinNonce) / 2 + strlen($this->netID) / 2 + strlen($this->devNonce) / 2 + 1))) * 8 + $len * 8,
-            '0',
-            STR_PAD_RIGHT
-        );
-        // dump((16 % ($len = (strlen($this->joinNonce)/2 + strlen($this->netID)/2 + strlen($this->devNonce)/2 + 1))) * 8 + $len * 8);
-        //     dump($binaryValue, ' ', self::hexToBinary($this->joinNonce), ' ',  self::hexToBinary($this->netID), ' ', self::hexToBinary($this->devNonce));
-        // dump(strlen($c));
-        // dump(hex2bin($this->appKey));
-        return $this->hasher->generate(
-            pack('H*', base_convert($c, 2, 16)),
-            hex2bin($this->appKey)
-        );
-    }
+
+    // private function generatorOfSKey($binaryValue)
+    // {
+    //     $c = str_pad(
+    //         $binaryValue . self::hexToBinary($this->joinNonce) . self::hexToBinary($this->netID) . self::hexToBinary($this->devNonce),
+    //         (16 % ($len = (strlen($this->joinNonce) / 2 + strlen($this->netID) / 2 + strlen($this->devNonce) / 2 + 1))) * 8 + $len * 8,
+    //         '0',
+    //         STR_PAD_RIGHT
+    //     );
+    //     // dump((16 % ($len = (strlen($this->joinNonce)/2 + strlen($this->netID)/2 + strlen($this->devNonce)/2 + 1))) * 8 + $len * 8);
+    //     //     dump($binaryValue, ' ', self::hexToBinary($this->joinNonce), ' ',  self::hexToBinary($this->netID), ' ', self::hexToBinary($this->devNonce));
+    //     // dump(strlen($c));
+    //     // dump(hex2bin($this->appKey));
+    //     return $this->hasher->generate(
+    //         pack('H*', base_convert($c, 2, 16)),
+    //         hex2bin($this->appKey)
+    //     );
+    // }
 
     public function makePayload(): string
     {
         return $this->payload =
-            self::reverseHex($this->joinNonce, 2)
+            $this->joinNonce
             . $this->netID
             . $this->devAddr
             . $this->dlSettings
@@ -79,28 +76,23 @@ class JoinAcceptHandler extends BasePackageHandler
 
     public function createResponse(): string
     {
-        dump('payload: ' ,self::makePayload());
-        dump('mic: ', self::calculateMIC($this->appKey));
-        dump('devAddr: ', $this->devAddr);
-        dump('phyPayload', self::makePHYPayload());
-        $this->payload = self::decrypt(self::makePayloadWithMIC());
-        $x = $this->mhdr . $this->payload . self::calculateMIC($this->appKey);
-        dump(base64_encode($x));
-        return $x;
+        self::makePayload();
+        self::calcMIC($this->payload);
+        $this->payload = self::decrypt($this->payload . $this->calculatedMIC);
+        return base64_encode(hex2bin($this->mhdr . $this->payload));
     }
 
     public function calcMIC($payload): string
     {
         $cmacInput = $this->mhdr . $payload;
-        $cmac = $this->hasher->generate(hex2bin($cmacInput), hex2bin($this->appKey));
+        $cmac = $this->hasher->generate(pack('H*',$cmacInput), pack('H*',$this->appKey));
+        dump(['cmac_input'=>$cmacInput, 'cmac' => bin2hex($cmac)]);
         return $this->calculatedMIC = substr(bin2hex($cmac), 0, 8);
     }
 
-    private function decrypt(string $data)
+    public function decrypt(string $data)
     {
-        dump('data: ', $data);
-        $x = bin2hex(openssl_decrypt($data, 'AES-128-ECB', $this->appKey, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, ''));
-        dump($x);
+        $x = bin2hex(openssl_decrypt(hex2bin($data), 'AES-128-ECB', hex2bin($this->appKey), OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING));
         return $x;
     }
 }

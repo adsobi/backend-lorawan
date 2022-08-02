@@ -85,10 +85,10 @@ abstract class BasePackageHandler
     function decryptAes($msgHex){
 
 		$iv = '010000000001' . $this->devAddr . '01000000' . '0000';
-        dump(strlen($iv));
+        //dump(strlen($iv));
 		//$key = hex2bin($this->appKey);
 		$bytes = openssl_decrypt(pack('H*', $msgHex), "AES-128-CBC", pack("H*", $this->appKey), OPENSSL_ZERO_PADDING, pack('H*', $iv));
-        dump('bytes: ', $bytes);
+        //dump('bytes: ', $bytes);
 		$plaintext = base64_encode($bytes);
 		$decoded_b64msg = base64_decode($plaintext, true);
 		return bin2hex($decoded_b64msg);
