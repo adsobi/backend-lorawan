@@ -69,7 +69,7 @@ class loraCrypto {
 	function decrypt($payload_hex, $sequence_counter_dec, $direction_dec = 0) {
 		$buffer = pack ( "H*", $payload_hex );
 		$size = strlen ( $buffer );
-		$sequence_counter = pack ( "H*", sprintf ( "%02X", $sequence_counter_dec ) );
+		$sequence_counter = pack ( "H*", sprintf ( "%08X", $sequence_counter_dec ) );
 		$key = pack ( "H*", $this->key_hex );
 		$dev_addr = pack ( "H*", $this->dev_addr_hex );
 		$direction = pack ( "H*", sprintf ( "%02X", $direction_dec ) );

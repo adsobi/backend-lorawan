@@ -25,10 +25,10 @@ class JoinRequestHandler extends BasePackageHandler
         public string $phyPayload
     ) {
         parent::__construct();
-
+        dump($this->payload);
         $this->joinEUI = self::reverseHex(substr($this->payload, 0, 16), 2);
         $this->devEUI = self::reverseHex(substr($this->payload, 16, 16), 2);
-        $this->devNonce = self::reverseHex(substr($this->payload, 32, 4), 2);
+        $this->devNonce = substr($this->payload, 32, 4);
         //devNonce must be unique in communication from end device to server on each message
 
     }

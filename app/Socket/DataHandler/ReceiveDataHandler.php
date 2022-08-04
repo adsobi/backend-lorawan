@@ -25,7 +25,7 @@ class ReceiveDataHandler
             case Packet::PKT_PUSH_DATA->value:
                 $messageObj = new PushDataMessage($message);
                 $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PUSH_ACK->value);
-                //dd(['responseHEx' => bin2hex($response), 'responseBin' => $response]);
+               // dump(['responseHEx' => bin2hex($response), 'responseBin' => $response]);
                 $server->send($response, $address);
 
                 if (isset($messageObj->payload['rxpk']))
@@ -44,8 +44,11 @@ class ReceiveDataHandler
                              * There checks is end-device authorized in db and then create JoinAcceptHandler
                             */
 
-                            $obj = new JoinAcceptHandler($phyPayload, $joinRequest->devNonce);
-
+                            $obj = new JoinAcceptHandler($joinRequest->devNonce);
+                            dump([
+                                'nwkSkey' => $obj->nwkSKey,
+                                'appSkey' => $obj->appSKey,
+                            ]);
                              Downlink::create([
                                 'gateway' => $address,
                                 'data' => $obj->createResponse(),
@@ -55,14 +58,21 @@ class ReceiveDataHandler
                                 'datr' => $messageObj->payload['rxpk'][0]['datr'],
                                 'codr' => $messageObj->payload['rxpk'][0]['codr'],
                              ]);
-
-                            $this->fCntUp = $this->fCntUp + 1;
                             break;
                         // case MType::JOIN_ACCEPT->value:
                         //     dump('JOIN_ACCEPT');
                         //     break;
                         case MType::UNCONFIRMED_DATA_UP->value:
                             dump('UNCONFIRMED_DATA_UP');
+                            $messageObj = new PushDataMessage($message);
+                            dump([ 'msgObj' => $messageObj->payload,
+                                  'MACPayload'=> $macPayload = substr_replace(substr_replace($str=bin2hex(base64_decode($messageObj->payload['rxpk'][0]['data'])),"", -8),"",0,2),
+                                  'data'=> $data = substr($macPayload, -24),
+                                  'devAddr' => $devAddr = self::reverseHex(substr($macPayload, 0 ,8)),
+                                  'fcntUp' => $fcntUp = hexdec(self::reverseHex(substr($macPayload, 10 ,4))),
+                            ]);
+                            $crypter = new loraCrypto("0e9e0f1008c6a2f9999aeedfaec01e47",$devAddr);
+                            dump(['decrypted'=> $crypter->decrypt($data, $fcntUp)]);
                             break;
                         // case MType::UNCONFIRMED_DATA_DOWN->value:
                         //     dump('UNCONFIRMED_DATA_DOWN');
