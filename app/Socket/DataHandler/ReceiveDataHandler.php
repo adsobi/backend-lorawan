@@ -25,7 +25,6 @@ class ReceiveDataHandler
             case Packet::PKT_PUSH_DATA->value:
                 $messageObj = new PushDataMessage($message);
                 $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PUSH_ACK->value);
-               // dump(['responseHEx' => bin2hex($response), 'responseBin' => $response]);
                 $server->send($response, $address);
 
                 if (isset($messageObj->payload['rxpk']))
@@ -33,17 +32,11 @@ class ReceiveDataHandler
 
                     $data = base64_decode($messageObj->payload['rxpk'][0]['data']);
                     $phyPayload = bin2hex($data);
-                    //dump(self::getMType(substr($phyPayload, 0,    2)));
                     switch (self::getMType(substr($phyPayload, 0, 2)))
                     {
                         case MType::JOIN_REQUEST->value:
-                            dump('JOIN_REQUEST');
-                            dump($address);
-                            $joinRequest = new JoinRequestHandler($phyPayload);
-                            /**
-                             * There checks is end-device authorized in db and then create JoinAcceptHandler
-                            */
 
+                            $joinRequest = new JoinRequestHandler($phyPayload);
                             $obj = new JoinAcceptHandler($joinRequest->devNonce);
                             dump([
                                 'nwkSkey' => $obj->nwkSKey,
@@ -59,43 +52,16 @@ class ReceiveDataHandler
                                 'codr' => $messageObj->payload['rxpk'][0]['codr'],
                              ]);
                             break;
-                        // case MType::JOIN_ACCEPT->value:
-                        //     dump('JOIN_ACCEPT');
-                        //     break;
                         case MType::UNCONFIRMED_DATA_UP->value:
-                            dump('UNCONFIRMED_DATA_UP');
                             $messageObj = new PushDataMessage($message);
-                            dump([ 'msgObj' => $messageObj->payload,
-                                  'MACPayload'=> $macPayload = substr_replace(substr_replace($str=bin2hex(base64_decode($messageObj->payload['rxpk'][0]['data'])),"", -8),"",0,2),
-                                  'data'=> $data = substr($macPayload, -24),
-                                  'devAddr' => $devAddr = self::reverseHex(substr($macPayload, 0 ,8)),
-                                  'fcntUp' => $fcntUp = hexdec(self::reverseHex(substr($macPayload, 10 ,4))),
-                            ]);
-                            $crypter = new loraCrypto("0e9e0f1008c6a2f9999aeedfaec01e47",$devAddr);
-                            dump(['decrypted'=> $crypter->decrypt($data, $fcntUp)]);
-                            break;
-                        // case MType::UNCONFIRMED_DATA_DOWN->value:
-                        //     dump('UNCONFIRMED_DATA_DOWN');
-                        //     break;
-                        case MType::CONFIRMED_DATA_UP->value:
-                            dump('CONFIRMED_DATA_UP');
-                            break;
-                        // case MType::CONFIRMED_DATA_DOWN->value:
-                        //     dump('CONFIRMED_DATA_DOWN');
-                        //     break;
-                        case MType::RFU->value:
-                            dump('RFU');
-                            break;
-                        case MType::PROPRIETARY->value:
-                            dump('PROPRIETARY');
+                            $preparedData = $this->preparePacketForDecryption($messageObj);
+                            $crypter = new loraCrypto("52a1987fc3577ef8f5c6569cef81544f",$preparedData['devAddr']);
+                            dump(['decryted'=>$crypter->decrypt($preparedData['data'], $preparedData['fcntUp'])]);
                             break;
                     }
                 }
+                break;
 
-                break;
-            case Packet::PKT_PUSH_ACK->value:
-                dump('PKT_PUSH_ACK');
-                break;
             case Packet::PKT_PULL_DATA->value:
                 $messageObj = new PullDataMessage($message);
                 $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PULL_ACK->value);
@@ -122,18 +88,7 @@ class ReceiveDataHandler
                     $downlink->delete();
                 }
                 break;
-            case Packet::PKT_PULL_RESP->value:
-                break;
-            case Packet::PKT_PULL_ACK->value:
-                dump('PKT_PULL_ACK');
-                break;
-            case Packet::PKT_TX_ACK->value:
-                $messageObj = new TxAckMessage($message);
-                dump('txack');
-                break;
         }
-
-       // dump($messageObj);
         return false;
     }
 
@@ -147,5 +102,20 @@ class ReceiveDataHandler
         return config('lorawan.protocolVersion') .
             ($this->token = bin2hex(openssl_random_pseudo_bytes(2))) .
             Packet::PKT_PULL_RESP->value;
+    }
+    public function preparePacketForDecryption($msgObj): array
+    {
+        $macPayload = substr_replace(substr_replace(bin2hex(base64_decode($msgObj->payload['rxpk'][0]['data'])),"", -8),"",0,2);
+        $devAddr = self::reverseHex(substr($macPayload, 0 ,8));
+        $foptslen =  hexdec(substr($macPayload, 9 ,1));
+        $fcntUp = hexdec(self::reverseHex(substr($macPayload, 10 ,4)));
+        $fport = hexdec(self::reverseHex(substr($macPayload,14+($foptslen*2),2)));
+        $data = substr($macPayload, -(strlen($macPayload)-16-($foptslen*2)));
+        return [
+            'devAddr' => $devAddr,
+            'fcntUp'=> $fcntUp,
+            'fport' => $fport,
+            'data' => $data,
+        ];
     }
 }
