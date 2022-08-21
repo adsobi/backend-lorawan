@@ -1,6 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AppController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EndNodeController;
+use App\Http\Controllers\GatewayController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +17,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'api'], function () {
+    Route::post('login', [AuthController::class, 'login']);
+});
+
+Route::group(['middleware' => ['api', 'cors', 'auth:sanctum']], function () {
+    Route::delete('logout', [AuthController::class, 'logout']);
+    Route::resource('apps', AppController::class)->only('store', 'show', 'index', 'destroy');
+    Route::resource('gateways', GatewayController::class)->only('store', 'show', 'index', 'destroy');
+    Route::resource('end-nodes', EndNodeController::class)->only('store', 'show', 'index', 'destroy');
 });

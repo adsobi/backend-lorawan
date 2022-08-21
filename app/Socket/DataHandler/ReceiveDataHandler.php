@@ -8,7 +8,6 @@ use App\Models\Downlink;
 use App\Socket\DatagramSocket;
 use App\Socket\Message\PullDataMessage;
 use App\Socket\Message\PushDataMessage;
-use App\Socket\Message\TxAckMessage;
 class ReceiveDataHandler
 {
     protected $fCntUp = 0;
@@ -66,7 +65,7 @@ class ReceiveDataHandler
                 $messageObj = new PullDataMessage($message);
                 $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PULL_ACK->value);
                 $server->send($response, $address);
-                $downlink = Downlink::all()->first();//TODO multiple gateway handle
+                $downlink = Downlink::all()->first();
                 if($downlink){
 
                     $response2 = json_encode(['txpk'=>[
