@@ -24,7 +24,7 @@ class EndNodeController extends Controller
 
     public function indexLastData(EndNode $endNode): HistoricalDataCollection
     {
-         return new HistoricalDataCollection($endNode->historicalData);
+         return new HistoricalDataCollection($endNode->historicalData()->latest()->take(50)->get());
     }
 
     public function store(EndNodeSaveRequest $request): EndNodeResource
