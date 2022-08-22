@@ -14,6 +14,9 @@ class HistoricalData extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'model' => 'HistoricalData',
+            'id' => $this->id,
+        ]
     }
 }
