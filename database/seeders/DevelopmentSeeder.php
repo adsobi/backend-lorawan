@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\App;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DevelopmentSeeder extends Seeder
@@ -17,6 +16,6 @@ class DevelopmentSeeder extends Seeder
     public function run()
     {
         User::factory()->create();
-        App::facory()->create();
+        App::factory()->create();
     }
 }

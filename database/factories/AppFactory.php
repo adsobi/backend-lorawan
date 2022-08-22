@@ -17,7 +17,7 @@ class AppFactory extends Factory
     public function definition()
     {
         return [
-            'key' => $this->faker->random_bytes(32),
+            'key' => $this->faker->regexify('[A-Za-z0-9]{32}'),
             'name' => $this->faker->name(),
             'description' => $this->faker->text(50),
         ];
