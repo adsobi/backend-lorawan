@@ -17,6 +17,6 @@ class HistoricalData extends JsonResource
         return [
             'model' => 'HistoricalData',
             'id' => $this->id,
-        ]
+        ];
     }
 }
