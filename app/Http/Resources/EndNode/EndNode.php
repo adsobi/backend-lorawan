@@ -3,6 +3,7 @@
 namespace App\Http\Resources\EndNode;
 
 use App\Http\Resources\App\App;
+use App\Http\Resources\HistoricalData\HistoricalData;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class EndNode extends JsonResource
@@ -21,10 +22,10 @@ class EndNode extends JsonResource
             'app' => new App($this->app),
             'dev_addr' => $this->dev_addr,
             'name' => $this->name,
-            'nwk_s_key' => $this->nwk_s_key,
-            'app_s_key' => $this->app_s_key,
             'dev_eui' => $this->dev_eui,
             'join_eui' => $this->join_eui,
+            'count_to_response' => $this->count_to_response,
+            'last_activity' => new HistoricalData($this->last_activity),
         ];
     }
 }

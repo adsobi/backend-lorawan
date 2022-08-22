@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('nwk_s_key')->nullable();
             $table->string('app_s_key')->nullable();
             $table->string('dev_eui');
+            $table->tinyInteger('count_to_response')->default(10);
             $table->string('join_eui');
             $table->timestamps();
         });
