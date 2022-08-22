@@ -20,6 +20,8 @@ class App extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'key' => $this->key,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'end_node_count' => $this->endNodes->count(),
         ];
     }
 }

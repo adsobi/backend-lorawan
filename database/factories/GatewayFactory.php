@@ -17,7 +17,7 @@ class GatewayFactory extends Factory
     public function definition()
     {
         return [
-            'key' => $this->faker->random_bytes(16),
+            'gateway_eui' => $this->faker->regexify('[A-Z0-9]{32}'),
             'name' => $this->faker->name(),
             'description' => $this->faker->text(50),
         ];

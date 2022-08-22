@@ -20,7 +20,7 @@ class AppController extends Controller
 
     public function index(): AppCollection
     {
-         return new AppCollection(App::all());
+         return new AppCollection(App::where('user_id', auth()->user()->id)->get());
     }
 
     public function store(AppSaveRequest $request): AppResource

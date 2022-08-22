@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('gateways', function (Blueprint $table) {
             $table->id();
-            $table->string('key');
+            $table->string('gateway_eui');
             $table->string('name');
             $table->text('description');
             $table->timestamps();
