@@ -26,4 +26,6 @@ Route::group(['middleware' => ['api', 'auth:sanctum']], function () {
     Route::resource('apps', AppController::class)->only('store', 'show', 'index', 'destroy');
     Route::resource('gateways', GatewayController::class)->only('store', 'show', 'index', 'destroy');
     Route::resource('end-nodes', EndNodeController::class)->only('store', 'show', 'index', 'destroy');
+    Route::get('end-nodes/{endNode}/data', [EndNodeController::class,'indexLastData']);
+
 });
