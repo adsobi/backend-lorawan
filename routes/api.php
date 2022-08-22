@@ -21,7 +21,7 @@ Route::group(['middleware' => 'api'], function () {
     Route::post('login', [AuthController::class, 'login']);
 });
 
-Route::group(['middleware' => ['api', 'cors', 'auth:sanctum']], function () {
+Route::group(['middleware' => ['api', 'auth:sanctum']], function () {
     Route::delete('logout', [AuthController::class, 'logout']);
     Route::resource('apps', AppController::class)->only('store', 'show', 'index', 'destroy');
     Route::resource('gateways', GatewayController::class)->only('store', 'show', 'index', 'destroy');

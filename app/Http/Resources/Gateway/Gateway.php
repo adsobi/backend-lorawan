@@ -19,6 +19,7 @@ class Gateway extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'key' => $this->key,
+            'description' => $this->description,
         ];
     }
 }

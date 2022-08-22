@@ -10,5 +10,6 @@ class Gateway extends Model
     protected $fillable = [
         'key',
         'name',
+        'description',
      ];
 }

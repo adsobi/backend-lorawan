@@ -10,6 +10,7 @@ class App extends Model
     protected $fillable = [
        'key',
        'name',
+       'description',
     ];
 
     public function endNodes(): HasMany

@@ -18,6 +18,7 @@ class App extends JsonResource
             'model' => 'App',
             'id' => $this->id,
             'name' => $this->name,
+            'description' => $this->description,
             'key' => $this->key,
         ];
     }
