@@ -11,6 +11,7 @@ class GatewaySaveRequest extends FormRequest
         return [
             'gateway_eui' => 'required|string|max:255',
             'name' => 'required|string|max:255',
+            'description' => 'required|string|max:65535'
         ];
     }
 }

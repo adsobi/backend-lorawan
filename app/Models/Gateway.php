@@ -15,7 +15,13 @@ class Gateway extends Model
         'name',
         'description',
      ];
-
+    public static function boot()
+    {
+        parent::boot();
+        self::creating(function ($model) {
+            $model->user_id = auth()->user()->id ;
+        });
+    }
      public function lastActivity(): Attribute
      {
          return new Attribute(fn() => $this

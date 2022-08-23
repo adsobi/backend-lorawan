@@ -16,6 +16,7 @@ class EndNode extends Model
         'app_id',
         'dev_addr',
         'name',
+        'description',
         'count_to_response',
         'nwk_s_key',
         'app_s_key',

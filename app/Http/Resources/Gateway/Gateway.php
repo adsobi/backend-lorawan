@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Gateway;
 
-use App\Http\Resources\HistoricalData\HistoricalData;
+use App\Http\Resources\HistoricalData\HistoricalDataWithoutDiffrentModels;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class Gateway extends JsonResource
@@ -21,7 +21,8 @@ class Gateway extends JsonResource
             'name' => $this->name,
             'gateway_eui' => $this->gateway_eui,
             'description' => $this->description,
-            'last_activity' => new HistoricalData($this->last_activity),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'last_activity' => $this->last_activity->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }

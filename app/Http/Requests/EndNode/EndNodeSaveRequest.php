@@ -13,6 +13,7 @@ class EndNodeSaveRequest extends FormRequest
             'name'  => 'required|string|max:255',
             'dev_eui'  => 'required|string|max:255',
             'join_eui'  => 'required|string|max:255',
+            'description' => 'required|string|max:65535',
             'count_to_response' => 'required|integer|min:1|max:127'
         ];
     }
