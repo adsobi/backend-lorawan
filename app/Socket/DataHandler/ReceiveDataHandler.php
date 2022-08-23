@@ -51,7 +51,7 @@ class ReceiveDataHandler
                                'data' => $messageObj->payload['rxpk'][0]['data'],
                                'type' => 'JoinRequest',
                            ]);
-                            $obj = new JoinAcceptHandler($joinRequest->devNonce);
+                            $obj = new JoinAcceptHandler($joinRequest->devNonce, $endNode->app->key);
                             $endNode->update([
                                 'dev_addr' => $obj->devAddr,
                                 'nwk_s_key' => $obj->nwkSKey,

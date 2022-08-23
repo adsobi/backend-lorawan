@@ -13,7 +13,7 @@ use CryptLib\MAC\Implementation\CMAC;
  */
 class JoinAcceptHandler extends BasePackageHandler
 {
-    protected string $appKey = '7CB49F63AC807CED46D681D539B40F09';
+
     public string $joinNonce;
     public string $netID;
     public string $devAddr;
@@ -30,6 +30,7 @@ class JoinAcceptHandler extends BasePackageHandler
      */
     public function __construct(
         public string $devNonce,
+        protected string $appKey,
     ) {
         //parent::__construct();
         $this->hasher = new CMAC();
