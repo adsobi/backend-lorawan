@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Downlink extends Model
 {
     protected $fillable = [
-        'gateway',
+        'gateway_id',
         'end_node_id',
         'data',
         'freq',
@@ -16,5 +16,6 @@ class Downlink extends Model
         'datr',
         'codr',
         'tmst',
+        'type',
     ];
 }

@@ -5,6 +5,9 @@ namespace App\Socket\DataHandler;
 use App\Enums\MType;
 use App\Enums\Packet;
 use App\Models\Downlink;
+use App\Models\EndNode;
+use App\Models\Gateway;
+use App\Models\HistoricalData;
 use App\Socket\DatagramSocket;
 use App\Socket\Message\PullDataMessage;
 use App\Socket\Message\PushDataMessage;
@@ -36,26 +39,54 @@ class ReceiveDataHandler
                         case MType::JOIN_REQUEST->value:
 
                             $joinRequest = new JoinRequestHandler($phyPayload);
+                            $endNode = EndNode::where('dev_eui',strtoupper($joinRequest->devEUI))->first();
+                            $gateway = Gateway::where('gateway_eui',strtoupper($messageObj->gatewayMAC))->first();
+                            if(!$endNode || !$gateway)
+                            {
+                                break;
+                            }
+                            HistoricalData::create([
+                               'end_node_id' => $endNode->id,
+                               'gateway_id' =>$gateway->id,
+                               'data' => $messageObj->payload['rxpk'][0]['data'],
+                               'type' => 'JoinRequest',
+                           ]);
                             $obj = new JoinAcceptHandler($joinRequest->devNonce);
-                            dump([
-                                'nwkSkey' => $obj->nwkSKey,
-                                'appSkey' => $obj->appSKey,
+                            $endNode->update([
+                                'dev_addr' => $obj->devAddr,
+                                'nwk_s_key' => $obj->nwkSKey,
+                                'app_s_key' => $obj->appSKey,
                             ]);
                              Downlink::create([
-                                'gateway' => $address,
+                                'gateway_id' => $gateway->id,
+                                'end_node_id' => $endNode->id,
                                 'data' => $obj->createResponse(),
                                 'tmst' => $messageObj->payload['rxpk'][0]['tmst'],
                                 'freq' => $messageObj->payload['rxpk'][0]['freq'],
                                 'modu' => $messageObj->payload['rxpk'][0]['modu'],
                                 'datr' => $messageObj->payload['rxpk'][0]['datr'],
                                 'codr' => $messageObj->payload['rxpk'][0]['codr'],
+                                'type' => 'JoinAccept'
                              ]);
                             break;
                         case MType::UNCONFIRMED_DATA_UP->value:
                             $messageObj = new PushDataMessage($message);
                             $preparedData = $this->preparePacketForDecryption($messageObj);
-                            $crypter = new loraCrypto("52a1987fc3577ef8f5c6569cef81544f",$preparedData['devAddr']);
-                            dump(['decryted'=>$crypter->decrypt($preparedData['data'], $preparedData['fcntUp'])]);
+                            $endNode = EndNode::where('dev_addr', self::reverseHex($preparedData['devAddr']))->first();
+                            $gateway = Gateway::where('gateway_eui',strtoupper($messageObj->gatewayMAC))->first();
+                            if(!$endNode || !$gateway)
+                            {
+                                break;
+                            }
+                            $crypter = new loraCrypto($preparedData['fcntUp'] == 0?$endNode->nwk_s_key: $endNode->app_s_key,$preparedData['devAddr']);
+                            HistoricalData::create([
+                                'end_node_id' => $endNode->id,
+                                'gateway_id' =>$gateway->id,
+                                'data' => $crypter->decrypt($preparedData['data'], $preparedData['fcntUp']),
+                                'type' => "Uplink",
+                                'snr' => $messageObj->payload['rxpk'][0]['lsnr'],
+                                'rssi'=> $messageObj->payload['rxpk'][0]['rssi'],
+                            ]);
                             break;
                     }
                 }
@@ -63,11 +94,15 @@ class ReceiveDataHandler
 
             case Packet::PKT_PULL_DATA->value:
                 $messageObj = new PullDataMessage($message);
+                $gateway = Gateway::where('gateway_eui',strtoupper($messageObj->gatewayMAC))->first();
+                if(!$gateway)
+                {
+                    break;
+                }
                 $response = hex2bin($messageObj->protocolVersion . $messageObj->token . Packet::PKT_PULL_ACK->value);
                 $server->send($response, $address);
-                $downlink = Downlink::all()->first();
+                $downlink = Downlink::where('gateway_id', $gateway->id)->first();
                 if($downlink){
-
                     $response2 = json_encode(['txpk'=>[
                         'imme' => false,
                         'tmst' => $downlink->tmst + 5000000,
@@ -83,6 +118,12 @@ class ReceiveDataHandler
                         'data' => $downlink->data
                      ]], JSON_UNESCAPED_SLASHES);
 
+                     HistoricalData::create([
+                        'end_node_id' => $downlink->end_node_id,
+                        'gateway_id' =>$gateway->id,
+                        'data' => $downlink->data,
+                        'type' => $downlink->type,
+                    ]);
                     $server->send(hex2bin($this->getPullResponseHeader()) . $response2, $address);
                     $downlink->delete();
                 }

@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\EndNode;
+use App\Models\Gateway;
+use App\Models\HistoricalData;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +19,8 @@ return new class extends Migration
         Schema::create('downlinks', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(EndNode::class)->constrained()->cascadeOnDelete();
-            $table->ipAddress('gateway');
+            $table->foreignIdFor(Gateway::class)->constrained()->cascadeOnDelete();
+            $table->enum('type', HistoricalData::TYPES);
             $table->text('data');
             $table->float('freq',8,3);
             $table->string('modu');

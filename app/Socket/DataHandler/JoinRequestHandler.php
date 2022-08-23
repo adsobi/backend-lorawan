@@ -25,7 +25,6 @@ class JoinRequestHandler extends BasePackageHandler
         public string $phyPayload
     ) {
         parent::__construct();
-        dump($this->payload);
         $this->joinEUI = self::reverseHex(substr($this->payload, 0, 16), 2);
         $this->devEUI = self::reverseHex(substr($this->payload, 16, 16), 2);
         $this->devNonce = substr($this->payload, 32, 4);

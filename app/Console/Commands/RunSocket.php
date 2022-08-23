@@ -38,7 +38,6 @@ class RunSocket extends Command
         $factory->createServer(env('SOCKET_URL_AND_PORT'))->then(function (DatagramSocket $server) {
             echo "Socket run on " . $server->getRemoteAddress() . "\n";
             $server->on('message', function ($message, $address, $server) {
-                dump($address);
                 $receivedMessage = new ReceiveDataHandler();
                 $response = $receivedMessage->handle($server, $address, $message);
 
@@ -57,10 +56,7 @@ class RunSocket extends Command
                     ]);
                     sleep(1);
                     $server->send($sendMessage->prepareMessage(), $address);
-                    dump('SEEEEENDED');
                     $server->send($sendMessage->prepareMessage(), $address);
-                    dump('ACK');
-                    dump($sendMessage);
                 }
             });
         });

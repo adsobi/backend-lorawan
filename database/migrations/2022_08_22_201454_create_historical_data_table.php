@@ -21,8 +21,8 @@ return new class extends Migration
             $table->foreignIdFor(EndNode::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Gateway::class)->constrained()->cascadeOnDelete();
             $table->text('data')->nullable();
-            $table->float('snr');
-            $table->integer('rssi');
+            $table->float('snr')->nullable();
+            $table->integer('rssi')->nullable();
             $table->enum('type', HistoricalData::TYPES);
             $table->timestamps();
         });
