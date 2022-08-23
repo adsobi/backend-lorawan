@@ -26,7 +26,7 @@ class EndNode extends JsonResource
             'dev_eui' => $this->dev_eui,
             'join_eui' => $this->join_eui,
             'count_to_response' => $this->count_to_response,
-            'last_activity' => $this->last_activity->created_at->format('Y-m-d H:i:s'),
+            'last_activity' => $this->last_activity?->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }
