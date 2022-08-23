@@ -22,7 +22,7 @@ class Gateway extends JsonResource
             'gateway_eui' => $this->gateway_eui,
             'description' => $this->description,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'last_activity' => $this->last_activity->created_at->format('Y-m-d H:i:s'),
+            'last_activity' => $this->last_activity?->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }

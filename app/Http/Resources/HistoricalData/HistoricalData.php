@@ -25,6 +25,7 @@ class HistoricalData extends JsonResource
             'snr'=> $this->snr,
             'rssi'=> $this->rssi,
             'type'=> $this->type,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }
